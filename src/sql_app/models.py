@@ -8,13 +8,13 @@ class User(Base):
     username = Column(String, unique=True, index=True)
 
 class Room(Base):
-    __table__ = 'rooms'
+    __tablename__ = 'rooms'
     room_id = Column(Integer, primary_key=True, index=True)
     room_name = Column(String, unique=True, index=True)
     capacity = Column(Integer)
 
 class Booking(Base):
-    __table__ = 'bookings'
+    __tablename__ = 'bookings'
     booking_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.user_id', ondelete='SET NULL'), nullable=False)
     room_id = Column(Integer, ForeignKey('rooms.room_id', ondelete='SET NULL'), nullable=False)

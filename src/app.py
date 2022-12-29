@@ -153,8 +153,15 @@ elif page == 'bookings':
                 minute=end_time.minute
             ).isoformat()
         }
-        # 定員処理
-        if booked_num <= capacity:
+
+        # 予約エラー処理
+        if booked_num > capacity:
+            st.error(f'{room_name}の定員は、{capacity}名です。{capacity}名以下の予約人数のみ受け付けております。')
+        elif start_time >= end_time:
+            st.error('開始時刻が終了時刻を超えています')
+        elif start_time < datetime.time(hour=9, minute=0, second=0) or end_time > datetime.time(hour=20, minute=0, second=0):
+            st.error('利用時間は9"00~20:00です')
+        else:
             url = 'http://127.0.0.1:8000/bookings'
             res =requests.post(
                 url,
@@ -162,6 +169,5 @@ elif page == 'bookings':
                 )
             if res.status_code == 200:
                 st.success('予約完了しました')
-            st.json(res.json())
-        else:
-            st.error(f'{room_name}の定員は、{capacity}名です。{capacity}名以下の予約人数のみ受け付けております。')
+            elif res.status_code == 404 and res.json()['detail'] == 'This time is already booked':
+                st.error('指定の時間にはすでに予約が入っています')

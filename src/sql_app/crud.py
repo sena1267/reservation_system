@@ -52,3 +52,10 @@ def create_booking(db: Session, booking: schemas.Booking):
         return db_booking
     else:
         raise HTTPException(status_code=404, detail='This time is already booked')
+
+# 予約削除
+def delete_booking(db: Session, booking_id: int):
+    booking = db.query(models.Booking).filter(models.Booking.booking_id == booking_id)
+    booking.delete()
+    db.commit()
+    return {'message': 'success'}

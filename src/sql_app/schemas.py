@@ -1,6 +1,9 @@
 import datetime
 from pydantic import BaseModel, Field
 
+class BookingDelete(BaseModel):
+    booking_id: int
+
 class BookingCreate(BaseModel):
     user_id: int
     room_id: int

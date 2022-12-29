@@ -49,3 +49,9 @@ async def create_room(room: schemas.RoomCreate, db: Session = Depends(get_db)):
 @app.post("/bookings", response_model=schemas.Booking)
 async def create_booking(booking: schemas.BookingCreate, db: Session = Depends(get_db)):
     return crud.create_booking(db=db, booking=booking)
+
+# Delete
+@app.delete("/bookings/{booking_id}")
+async def delete_booking(booking_id: int, db: Session = Depends(get_db)):
+    return crud.delete_booking(db=db, booking_id=booking_id)
+    # return {'id': booking_id}

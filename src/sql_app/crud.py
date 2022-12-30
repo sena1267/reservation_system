@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
 
 # ユーザー一覧登録
 def get_users(db: Session, skip: int = 0, limit: int = 100):
@@ -59,3 +60,15 @@ def delete_booking(db: Session, booking_id: int):
     booking.delete()
     db.commit()
     return {'message': 'success'}
+
+# 予約編集
+def update_booking(db: Session, booking_id: int, booking_update: schemas.Booking):
+    booking: models.Booking = db.query(models.Booking).\
+                                filter(models.Booking.booking_id == booking_id).first()
+    booking.user_id = booking_update.user_id
+    booking.room_id = booking_update.room_id
+    booking.booked_num = booking_update.booked_num
+    booking.start_datetime = booking_update.start_datetime
+    booking.end_datetime = booking_update.end_datetime
+    db.commit()
+    return booking

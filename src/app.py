@@ -4,16 +4,14 @@ import requests
 import json
 import pandas as pd
 
-page = st.sidebar.selectbox('Choose your page', ['users', 'rooms', 'bookings'])
+page = st.sidebar.selectbox('Choose your page', ['ユーザー登録', '会議室登録', '会議室予約'])
 
-if page == 'users':
+if page == 'ユーザー登録':
     st.title('ユーザ登録画面')
 
     with st.form(key='user'):
-        # user_id: int = random.randint(0, 10)
         username: str = st.text_input('ユーザー名', max_chars=12)
         data = {
-            # 'user_id': user_id,
             'username': username
         }
         submit_button = st.form_submit_button(label='ユーザー登録')
@@ -29,24 +27,19 @@ if page == 'users':
             st.success('ユーザー登録完了')
         st.json(res.json())
 
-elif page == 'rooms':
+elif page == '会議室登録':
     st.title('会議室登録画面')
 
     with st.form(key='room'):
-        # room_id: int = random.randint(0, 10)
         room_name: str = st.text_input('会議室名', max_chars=12)
         capacity: int = st.number_input('定員', step=1)
         data = {
-            # 'room_id': room_id,
             'room_name': room_name,
             'capacity': capacity
         }
         submit_button = st.form_submit_button(label='会議室登録')
 
     if submit_button:
-        # st.write('## 送信データ')
-        # st.json(data)
-        # st.write('## レスポンス結果')
         url = 'http://127.0.0.1:8000/rooms'
         res =requests.post(
             url,
@@ -56,7 +49,7 @@ elif page == 'rooms':
             st.write('会議室登録完了')
         st.json(res.json())
 
-elif page == 'bookings':
+elif page == '会議室予約':
     st.title('会議室予約画面')
 
     # ユーザー一取得

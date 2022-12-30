@@ -4,7 +4,11 @@ import requests
 import json
 import pandas as pd
 
-page = st.sidebar.selectbox('Choose your page', ['ユーザー登録', '会議室登録', '会議室予約'])
+page = st.sidebar.selectbox('Choose your page', 
+        ['ユーザー登録',
+        '会議室登録',
+        '会議室予約',
+        '会議室予約取消'])
 
 if page == 'ユーザー登録':
     st.title('ユーザ登録画面')
@@ -164,3 +168,69 @@ elif page == '会議室予約':
                 st.success('予約完了しました')
             elif res.status_code == 404 and res.json()['detail'] == 'This time is already booked':
                 st.error('指定の時間にはすでに予約が入っています')
+
+elif page == '会議室予約取消':
+    # ユーザー一取得
+    url_users = 'http://127.0.0.1:8000/users'
+    res = requests.get(url_users)
+    users = res.json()
+    users_name = {}
+    for user in users:
+        users_name[user['username']] = user['user_id']
+
+    # 会議室一覧取得
+    url_rooms = 'http://127.0.0.1:8000/rooms'
+    res = requests.get(url_rooms)
+    rooms = res.json()
+    rooms_name = {}
+    for room in rooms:
+        rooms_name[room['room_name']] = {
+            'room_id': room['room_id'],
+            'capacity': room['capacity']
+        }
+
+    url_bookings = 'http://127.0.0.1:8000/bookings'
+    res = requests.get(url_bookings)
+    bookings = res.json()
+    df_bookings = pd.DataFrame(bookings)
+
+    users_id = {}
+    for user in users:
+        users_id[user['user_id']] = user['username']
+
+    rooms_id = {}
+    for room in rooms:
+        rooms_id[room['room_id']] = {
+            'room_name': room['room_name'],
+            'capacity': room['capacity']
+        }
+
+    # IDを各値に変更
+    to_username = lambda x: users_id[x]
+    to_room_name = lambda x: rooms_id[x]['room_name']
+    to_datetime = lambda x: datetime.datetime.fromisoformat(x).strftime('%Y/%m/%d %H:%M')
+
+    df_bookings['user_id'] = df_bookings['user_id'].map(to_username)
+    df_bookings['room_id'] = df_bookings['room_id'].map(to_room_name)
+    df_bookings['start_datetime'] = df_bookings['start_datetime'].map(to_datetime)
+    df_bookings['end_datetime'] = df_bookings['end_datetime'].map(to_datetime)
+    
+    df_bookings = df_bookings.rename(columns={
+        'user_id' : '予約者名',
+        'room_id': '会議室名',
+        'booked_num': '予約人数',
+        'start_datetime': '開始時刻',
+        'end_datetime': '終了時刻',
+        'booking_id': '予約番号'
+    })
+
+    st.write('### 予約一覧')
+    st.table(df_bookings)
+
+    with st.form(key='delete_booking'):
+        booking_id: int = st.number_input('予約番号', step=1, min_value=1)
+
+        submit_button = st.form_submit_button(label='予約取消')
+        if submit_button:
+            url = f'http://127.0.0.1:8000/bookings/{booking_id}'
+            res = requests.delete(url)
